@@ -1,0 +1,12 @@
+.venv
+data
+tmp
+output
+frontend/node_modules
+frontend/.next
+frontend/out
+backend/tests
+.git
+.env
+**/__pycache__
+

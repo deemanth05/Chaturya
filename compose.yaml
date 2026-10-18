@@ -1,0 +1,42 @@
+# Preparation: docker compose build; docker build -f infra/sandbox.Dockerfile -t chaturya-sandbox:local .
+# Runtime: docker compose up --pull never (all images must already exist).
+services:
+  workbench:
+    image: chaturya-workbench:local
+    build:
+      context: .
+      dockerfile: infra/backend.Dockerfile
+    pull_policy: never
+    ports: ["127.0.0.1:8000:8000"]
+    environment:
+      WORKBENCH_DATA: /app/data
+      WORKBENCH_PROFILE: college
+      WORKBENCH_REGISTRY: /app/config/registry.docker.yaml
+      WORKBENCH_ORIGINS: ${WORKBENCH_ORIGINS:-http://localhost:8000,http://127.0.0.1:8000}
+      WORKBENCH_SECURE_COOKIES: ${WORKBENCH_SECURE_COOKIES:-false}
+      WORKBENCH_SANDBOX_MOUNT_ROOT: ${WORKBENCH_SANDBOX_MOUNT_ROOT:?Set to absolute host path of ./data}
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks: [internal]
+    depends_on: [lm-relay]
+    restart: unless-stopped
+  lm-relay:
+    image: alpine/socat:latest
+    # Container loopback cannot access the native Windows LM Link listener.
+    command: ["TCP-LISTEN:1234,fork,reuseaddr", "TCP:${WORKBENCH_LM_HOST:?Set a reachable Mac LAN IP}:${WORKBENCH_LM_PORT:-1234}"]
+    networks:
+      internal: {ipv4_address: 172.30.80.10}
+      relay: {}
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    read_only: true
+    restart: unless-stopped
+networks:
+  internal:
+    internal: true
+    ipam:
+      config: [{subnet: 172.30.80.0/24}]
+  relay: {}
+

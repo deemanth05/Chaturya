@@ -1,0 +1,42 @@
+version: 1
+network:
+  # Exact destinations; adding a model never silently authorizes a new host.
+  allowed_origins:
+    - http://127.0.0.1:1234
+    - http://127.0.0.1:1235
+router:
+  laya_url: null  # http://127.0.0.1:1235/v1/systemone for scripts/laya_server.py
+  laya_model: laya
+  minimum_probability: 0.75
+models:
+  - id: google/gemma-4-12b-qat
+    label: Mac Gemma via LM Studio and LM Link
+    base_url: http://127.0.0.1:1234/v1
+    enabled: true
+    modalities: [text, image]
+    # Verified with LM Studio 0.4.26: avoids exhausting JSON output on hidden thinking.
+    reasoning_effort: none
+    max_output_tokens: 4096
+    capabilities_verified: false
+    # Image input is a provisional declaration; a live probe is still required.
+    strengths: {extraction: 0.8, reasoning: 0.8, code: 0.6, writing: 0.8}
+    max_concurrency: 1
+    memory_gb: null
+  - id: text-embedding-bge-m3
+    label: BGE M3 local embeddings
+    base_url: http://127.0.0.1:1234/v1
+    enabled: false
+    modalities: [embedding]
+    capabilities_verified: false
+    strengths: {embedding: 1.0}
+    # Enable only after installing an embedding model and verifying its exact ID.
+  - id: text-embedding-nomic-embed-text-v1.5
+    label: Nomic embeddings via LM Studio
+    base_url: http://127.0.0.1:1234/v1
+    enabled: true
+    modalities: [embedding]
+    capabilities_verified: false
+    strengths: {embedding: 0.9}
+    document_prefix: 'search_document: '
+    query_prefix: 'search_query: '
+

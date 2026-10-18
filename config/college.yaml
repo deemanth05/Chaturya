@@ -1,0 +1,15 @@
+# Supply real institution information. No sample college, courses or policies are seeded.
+institution:
+  name: ""
+  timezone: Asia/Calcutta
+  default_language: English
+workflows:
+  - question
+  - study
+  - teaching
+  - letter
+  - code
+# These are application permissions, not college academic policies.
+teaching_roles: [admin, faculty]
+letter_roles: [admin, staff, faculty]
+max_sources: 6
